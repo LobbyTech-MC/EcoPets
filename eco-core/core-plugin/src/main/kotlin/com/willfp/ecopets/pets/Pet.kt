@@ -114,7 +114,6 @@ class Pet(
     }
 
     val entityTexture = config.getString("entity-texture")
-    val modelEngineAnimation = config.getStringOrNull("modelengine-animation")
 
     private val levelXpRequirements = listOf(0) + config.getInts("level-xp-requirements")
 
@@ -363,6 +362,8 @@ class Pet(
         val level = player.getPetLevel(this)
         val isActive = player.activePet == this
 
+        val baseLoreLocation = if (level == this.maxLevel) "max-level-lore" else "lore"
+
         return ItemStackBuilder(base)
             .setDisplayName(
                 plugin.configYml.getFormattedString("gui.pet-icon.name")
@@ -370,7 +371,7 @@ class Pet(
                     .replace("%pet%", this.name)
             )
             .addLoreLines {
-                injectPlaceholdersInto(plugin.configYml.getStrings("gui.pet-icon.lore"), player) +
+                injectPlaceholdersInto(plugin.configYml.getStrings("gui.pet-icon.$baseLoreLocation"), player) +
                         if (isActive) plugin.configYml.getStrings("gui.pet-icon.active-lore") else
                             plugin.configYml.getStrings("gui.pet-icon.not-active-lore")
             }
@@ -379,6 +380,9 @@ class Pet(
 
     fun getPetInfoIcon(player: Player): ItemStack {
         val base = baseItem.clone()
+
+        val prefix = if (player.getPetLevel(this) == this.maxLevel) "max-level-" else ""
+
         return ItemStackBuilder(base)
             .setDisplayName(
                 plugin.configYml.getFormattedString("gui.pet-info.active.name")
@@ -386,7 +390,7 @@ class Pet(
                     .replace("%pet%", this.name)
             )
             .addLoreLines {
-                injectPlaceholdersInto(plugin.configYml.getStrings("gui.pet-info.active.lore"), player)
+                injectPlaceholdersInto(plugin.configYml.getStrings("gui.pet-info.active.${prefix}lore"), player)
             }
             .build()
     }
